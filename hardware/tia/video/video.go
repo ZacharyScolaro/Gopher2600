@@ -553,11 +553,11 @@ func (vd *Video) UpdateSpritePositioning(data chipbus.ChangedRegister) bool {
 func (vd *Video) UpdateColor(data chipbus.ChangedRegister) bool {
 	switch data.Register {
 	case cpubus.COLUP0:
-		vd.Player0.setColor(data.Value & 0xfe)
-		vd.Missile0.setColor(data.Value & 0xfe)
+		vd.Player0.setColor(data.Value)
+		vd.Missile0.setColor(data.Value)
 	case cpubus.COLUP1:
-		vd.Player1.setColor(data.Value & 0xfe)
-		vd.Missile1.setColor(data.Value & 0xfe)
+		vd.Player1.setColor(data.Value)
+		vd.Missile1.setColor(data.Value)
 	default:
 		return true
 	}
@@ -577,10 +577,10 @@ func (vd *Video) UpdateColor(data chipbus.ChangedRegister) bool {
 func (vd *Video) UpdatePlayfieldAndBackgroundColor(data chipbus.ChangedRegister) bool {
 	switch data.Register {
 	case cpubus.COLUPF:
-		vd.Playfield.setColor(data.Value & 0xfe)
-		vd.Ball.setColor(data.Value & 0xfe)
+		vd.Playfield.setColor(data.Value)
+		vd.Ball.setColor(data.Value)
 	case cpubus.COLUBK:
-		vd.Playfield.setBackground(data.Value & 0xfe)
+		vd.Playfield.setBackground(data.Value)
 	default:
 		return true
 	}

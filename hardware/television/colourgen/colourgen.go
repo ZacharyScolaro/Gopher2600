@@ -52,9 +52,9 @@ type ColourGen struct {
 // NewColourGen is the preferred method of intialisation for the ColourGen type.
 func NewColourGen() (*ColourGen, error) {
 	c := &ColourGen{
-		ntsc:  make([]entry, 128),
-		pal:   make([]entry, 128),
-		secam: make([]entry, 128),
+		ntsc:  make([]entry, 256),
+		pal:   make([]entry, 256),
+		secam: make([]entry, 256),
 	}
 
 	c.SetDefaults()
@@ -226,7 +226,7 @@ func (c *ColourGen) GenerateNTSC(col signal.ColorSignal) color.RGBA {
 		return VideoBlack
 	}
 
-	idx := uint8(col) >> 1
+	idx := uint8(col)
 
 	if c.ntsc[idx].generated == true {
 		return c.ntsc[idx].col
@@ -236,7 +236,7 @@ func (c *ColourGen) GenerateNTSC(col signal.ColorSignal) color.RGBA {
 	var Y, I, Q float64
 
 	// color-luminance components of color signal
-	lum := (col & 0x0e) >> 1
+	lum := (col & 0x0f)
 	hue := (col & 0xf0) >> 4
 
 	// if hue is zero then that indicates there is no colour component and
@@ -249,7 +249,7 @@ func (c *ColourGen) GenerateNTSC(col signal.ColorSignal) color.RGBA {
 			// example, the CyberTech AV mod produces a black with a value of 0.075
 			c.ntsc[idx].col = color.RGBA{A: 255}
 		} else {
-			Y = float64(lum) / 7
+			Y = float64(lum) / 15
 			Y, I, Q = c.adjustYIQ(Y, I, Q)
 			y := uint8(clamp(Y) * 255)
 			c.ntsc[idx].col = color.RGBA{R: y, G: y, B: y, A: 255}
@@ -265,7 +265,7 @@ func (c *ColourGen) GenerateNTSC(col signal.ColorSignal) color.RGBA {
 	)
 
 	// Y value in the range minY to MaxY based on the lum value
-	Y = minY + (float64(lum)/8)*(maxY-minY)
+	Y = minY + (float64(lum)/16)*(maxY-minY)
 
 	// the colour component indicates a point on the 'colour wheel'
 	phi := (float64(hue)) * -c.NTSCPhase.Get().(float64)
@@ -359,7 +359,7 @@ func (c *ColourGen) GeneratePAL(col signal.ColorSignal) color.RGBA {
 		return VideoBlack
 	}
 
-	idx := uint8(col) >> 1
+	idx := uint8(col)
 
 	if c.pal[idx].generated == true {
 		return c.pal[idx].col
@@ -369,7 +369,7 @@ func (c *ColourGen) GeneratePAL(col signal.ColorSignal) color.RGBA {
 	var Y, U, V float64
 
 	// color-luminance components of color signal
-	lum := (col & 0x0e) >> 1
+	lum := (col & 0x0f)
 	hue := (col & 0xf0) >> 4
 
 	// PAL creates a grayscale for hues 0, 1, 14 and 15
@@ -381,7 +381,7 @@ func (c *ColourGen) GeneratePAL(col signal.ColorSignal) color.RGBA {
 			// example, the CyberTech AV mod produces a black with a value of 0.075
 			c.pal[idx].col = color.RGBA{A: 255}
 		} else {
-			Y = float64(lum) / 7
+			Y = float64(lum) / 15
 			Y, U, V = c.adjustYUV(Y, U, V)
 			y := uint8(clamp(Y) * 255)
 			c.pal[idx].col = color.RGBA{R: y, G: y, B: y, A: 255}
@@ -397,7 +397,7 @@ func (c *ColourGen) GeneratePAL(col signal.ColorSignal) color.RGBA {
 	)
 
 	// Y value in the range minY to MaxY based on the lum value
-	Y = minY + (float64(lum)/8)*(maxY-minY)
+	Y = minY + (float64(lum)/16)*(maxY-minY)
 
 	var phi float64
 
@@ -474,7 +474,7 @@ func (c *ColourGen) GenerateSECAM(col signal.ColorSignal) color.RGBA {
 	var Y, U, V float64
 
 	// color-luminance components of color signal
-	lum := (col & 0x0e) >> 1
+	lum := (col & 0x0e)
 
 	// the hue nibble of the signal.ColourSignal value is ignored by SECAM
 	// consoles
